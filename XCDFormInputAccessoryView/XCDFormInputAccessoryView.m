@@ -7,6 +7,10 @@
 
 #import "XCDFormInputAccessoryView.h"
 
+// counting from right edge.
+#define DONE_BUTTON_IDX 0
+#define CLEAR_BUTTON_IDX (NSInteger)(self.hasDoneButton)
+
 static NSString * UIKitLocalizedString(NSString *string)
 {
 	NSBundle *UIKitBundle = [NSBundle bundleForClass:[UIApplication class]];
@@ -58,7 +62,8 @@ static NSArray * EditableTextInputsInView(UIView *view)
 	UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
 	_toolbar.items = @[ segmentedControlBarButtonItem, flexibleSpace ];
 	self.hasDoneButton = [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone;
-	
+    self.hasClearButton = YES;
+    
 	[self addSubview:_toolbar];
 	
 	self.frame = _toolbar.frame = (CGRect){CGPointZero, [_toolbar sizeThatFits:CGSizeZero]};
@@ -117,6 +122,15 @@ static NSArray * EditableTextInputsInView(UIView *view)
 	}];
 }
 
+- (UIResponder *)currentResponder {
+    for (UIResponder *responder in self.responders) {
+        if ([responder isFirstResponder]) {
+            return responder;
+        }
+    }
+    return nil;
+}
+
 - (void) setHasDoneButton:(BOOL)hasDoneButton
 {
 	[self setHasDoneButton:hasDoneButton animated:NO];
@@ -131,13 +145,32 @@ static NSArray * EditableTextInputsInView(UIView *view)
 	_hasDoneButton = hasDoneButton;
 	[self didChangeValueForKey:@"hasDoneButton"];
 	
-	NSArray *items;
+	NSMutableArray *items = _toolbar.items.mutableCopy;
+    NSInteger shift = DONE_BUTTON_IDX;
 	if (hasDoneButton)
-		items = [_toolbar.items arrayByAddingObject:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(done)]];
+		[items insertObject:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(done)]
+                    atIndex:items.count-shift];
 	else
-		items = [_toolbar.items subarrayWithRange:NSMakeRange(0, 2)];
+		[items removeObjectAtIndex:items.count-shift];
 	
 	[_toolbar setItems:items animated:animated];
+}
+
+- (void)setHasClearButton:(BOOL)hasClearButton {
+ 	if (_hasClearButton == hasClearButton)
+		return;
+	
+	_hasClearButton = hasClearButton;
+	
+	NSMutableArray *items = _toolbar.items.mutableCopy;
+    NSInteger shift = CLEAR_BUTTON_IDX;
+	if (hasClearButton)
+        [items insertObject:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemStop target:self action:@selector(clear)]
+                    atIndex:items.count-shift];
+	else {
+		[items removeObjectAtIndex:items.count-shift];
+    }
+	[_toolbar setItems:items];
 }
 
 #pragma mark - Actions
@@ -161,6 +194,13 @@ static NSArray * EditableTextInputsInView(UIView *view)
 - (void) done
 {
 	[[UIApplication sharedApplication] sendAction:@selector(resignFirstResponder) to:nil from:nil forEvent:nil];
+}
+
+- (void)clear {
+    UIResponder *currentResponder = [self currentResponder];
+    if ([currentResponder respondsToSelector:@selector(setText:)]) {
+        [currentResponder performSelector:@selector(setText:) withObject:@""];
+    }
 }
 
 @end
