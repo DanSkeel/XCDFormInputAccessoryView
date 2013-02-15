@@ -131,6 +131,10 @@ static NSArray * EditableTextInputsInView(UIView *view)
     return nil;
 }
 
+- (BOOL *)isEditing {
+    return ([self currentResponder] != nil);
+}
+
 - (void) setHasDoneButton:(BOOL)hasDoneButton
 {
 	[self setHasDoneButton:hasDoneButton animated:NO];

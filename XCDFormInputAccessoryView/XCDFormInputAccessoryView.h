@@ -13,6 +13,8 @@
 
 @property (nonatomic, strong) NSArray *responders;
 
+@property (nonatomic, assign) BOOL *isEditing; // if some of responders is firstResponder
+
 @property (nonatomic, assign) BOOL hasDoneButton; // Defaults to YES on iPhone, NO on iPad
 
 @property (nonatomic, assign) BOOL hasClearButton;
