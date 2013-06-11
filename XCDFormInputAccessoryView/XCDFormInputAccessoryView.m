@@ -131,7 +131,7 @@ static NSArray * EditableTextInputsInView(UIView *view)
     return nil;
 }
 
-- (BOOL *)isEditing {
+- (BOOL)isEditing {
     return ([self currentResponder] != nil);
 }
 
