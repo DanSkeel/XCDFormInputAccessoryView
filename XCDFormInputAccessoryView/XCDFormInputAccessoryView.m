@@ -174,7 +174,6 @@ static NSArray * EditableTextInputsInView(UIView *view)
         [items insertObjects:@[cancelButton, flexibleSpace] atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(index, 2)]];
     } else {
         [items removeObjectsAtIndexes: [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(index-2, 2)]];
-        /// don't forget to remove space
     }
 	[_toolbar setItems:items];
 }
