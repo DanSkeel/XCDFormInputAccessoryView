@@ -63,7 +63,6 @@ static NSArray * EditableTextInputsInView(UIView *view)
 	_toolbar.items = @[ segmentedControlBarButtonItem, flexibleSpace ];
 	self.hasDoneButton = [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone;
     self.hasClearButton = YES;
-    
 	[self addSubview:_toolbar];
 	
 	self.frame = _toolbar.frame = CGRectMake(0, 0, 0, 44);
@@ -150,12 +149,12 @@ static NSArray * EditableTextInputsInView(UIView *view)
 	[self didChangeValueForKey:@"hasDoneButton"];
 	
 	NSMutableArray *items = _toolbar.items.mutableCopy;
-    NSInteger shift = DONE_BUTTON_IDX;
+    NSInteger index = items.count - DONE_BUTTON_IDX;
 	if (hasDoneButton)
 		[items insertObject:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(done)]
-                    atIndex:items.count-shift];
+                    atIndex:index];
 	else
-		[items removeObjectAtIndex:items.count-shift];
+		[items removeObjectAtIndex:index-1];
 	
 	[_toolbar setItems:items animated:animated];
 }
@@ -163,16 +162,19 @@ static NSArray * EditableTextInputsInView(UIView *view)
 - (void)setHasClearButton:(BOOL)hasClearButton {
  	if (_hasClearButton == hasClearButton)
 		return;
-	
+    [self willChangeValueForKey:@"hasCancelButton"];
 	_hasClearButton = hasClearButton;
-	
+    [self didChangeValueForKey:@"hasCancelButton"];
+    
 	NSMutableArray *items = _toolbar.items.mutableCopy;
-    NSInteger shift = CLEAR_BUTTON_IDX;
-	if (hasClearButton)
-        [items insertObject:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemStop target:self action:@selector(clear)]
-                    atIndex:items.count-shift];
-	else {
-		[items removeObjectAtIndex:items.count-shift];
+    NSInteger index = items.count - CLEAR_BUTTON_IDX;
+	if (hasClearButton){
+        UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemStop target:self action:@selector(clear)];
+        UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+        [items insertObjects:@[cancelButton, flexibleSpace] atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(index, 2)]];
+    } else {
+        [items removeObjectsAtIndexes: [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(index-2, 2)]];
+        /// don't forget to remove space
     }
 	[_toolbar setItems:items];
 }
