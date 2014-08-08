@@ -7,6 +7,8 @@
 
 #import "XCDFormInputAccessoryView.h"
 
+#define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
+
 // counting from right edge.
 #define DONE_BUTTON_IDX 0
 #define CLEAR_BUTTON_IDX (NSInteger)(self.hasDoneButton)
@@ -51,7 +53,9 @@ static NSArray * EditableTextInputsInView(UIView *view)
 	
 	_toolbar = [[UIToolbar alloc] init];
 	_toolbar.tintColor = nil;
-	_toolbar.barStyle = UIBarStyleBlack;
+    if (SYSTEM_VERSION_LESS_THAN(@"7.0")) {
+        _toolbar.barStyle = UIBarStyleBlack;
+    }
 	_toolbar.translucent = YES;
 	_toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 	UISegmentedControl *segmentedControl = [[UISegmentedControl alloc] initWithItems:@[ UIKitLocalizedString(@"Previous"), UIKitLocalizedString(@"Next") ]];
